@@ -9,3 +9,11 @@ target_link_libraries(server
         rdmacm
         ibverbs
 )
+
+
+add_executable(client client.cpp)
+target_link_libraries(client
+    PUBLIC
+        rdmacm
+        ibverbs
+)
