@@ -31,16 +31,9 @@ int main(int argc, char **argv) {
     std::memset((char*)&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(DEST_PORT);
+    inet_pton(AF_INET, DEST_ADDR, &server_addr.sin_addr);
 
-    // Check if there is an address of the host
-    if (server->h_addr_list[0])
-        std::memcpy((char*)server->h_addr_list[0], (char*)&server_addr.sin_addr, server->h_length);
-    else {
-        std::cerr << "There is no a valid address for that hostname!\n";
-        return -5;
-    }
-
-    if (connect(socket, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+    if (rconnect(socket, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         std::cerr << "Connection could not be established!\n";
         return -6;
     }

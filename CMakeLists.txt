@@ -17,3 +17,17 @@ target_link_libraries(client
         rdmacm
         ibverbs
 )
+
+add_executable(ibm_client_example ibm_client_example.cpp)
+target_link_libraries(ibm_client_example
+        PUBLIC
+        rdmacm
+        ibverbs
+        )
+
+add_executable(ibm_server_example ibm_server_example.cpp)
+target_link_libraries(ibm_server_example
+        PUBLIC
+        rdmacm
+        ibverbs
+        )
