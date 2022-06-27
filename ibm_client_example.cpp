@@ -27,7 +27,7 @@ struct pdata {
 };
 
 int main(int argc, char* argv[]) {
-    struct pdata* server_pdata;
+    struct pdata server_pdata;
     struct rdma_event_channel* cm_channel;
     struct rdma_cm_id* cm_id;
     struct rdma_cm_event* event;
@@ -154,8 +154,8 @@ int main(int argc, char* argv[]) {
     send_wr.opcode = IBV_WR_RDMA_WRITE;
     send_wr.sg_list = &sge;
     send_wr.num_sge = 1;
-    send_wr.wr.rdma.rkey = ntohl(server_pdata->buf_rkey);
-    send_wr.wr.rdma.remote_addr = ntohl(server_pdata->buf_va);
+    send_wr.wr.rdma.rkey = ntohl(server_pdata.buf_rkey);
+    send_wr.wr.rdma.remote_addr = ntohl(server_pdata.buf_va);
 
     if (ibv_post_send(cm_id->qp, &send_wr, &bad_send_wr))
         return 1;
