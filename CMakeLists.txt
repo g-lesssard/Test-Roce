@@ -1,6 +1,9 @@
-project(test_roce)
+cmake_minimum_required(VERSION 3.13)
 
+project(test_roce)
 set(CMAKE_CXX_STANDARD 20)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(infinity/infinity)
 
 
 add_executable(server server.cpp)
@@ -31,3 +34,9 @@ target_link_libraries(ibm_server_example
         rdmacm
         ibverbs
         )
+
+add_executable(example_infinity example_infinity.cpp)
+target_link_libraries(example_infinity
+        PUBLIC
+        lib-infinity
+)
