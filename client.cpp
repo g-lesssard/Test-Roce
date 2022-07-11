@@ -38,6 +38,9 @@ int main(int argc, char **argv) {
         return -6;
     }
     std::cout << "[INFO] Connection established.\n";
+    char message[] = "Hello RDMA!";
+    if (rsend(socket, message, sizeof(message), 0) < 0)
+        std::cerr << "[ERROR] Failed to send message";
     std::cout << "Program teardown..." << std::endl;
     rclose(socket);
     std::cout << "DONE!" << std::endl;
