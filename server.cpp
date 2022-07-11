@@ -4,6 +4,8 @@
 
 constexpr unsigned int PORT = 6969;
 
+char message[100];
+
 
 
 int main(int argc, char **argv) {
@@ -46,8 +48,9 @@ int main(int argc, char **argv) {
     if ((sock_client = raccept(sock_listener,(sockaddr*)&client_addr, &client_addr_size)) < 0) {
         std::cerr << "Could not accept connection on socket" << std::endl;
     }
-    std::cout << "Succesfully accepted connection!" << std::endl;
-
+    std::cout << "Successfully accepted connection!" << std::endl;
+    ssize_t size = rrecv(sock_client, message, 12, MSG_WAITALL);
+    std::cout << "[INFO] Received message(" << size << "): " << message << std::endl;
     std::cout << "Program teardown..." << std::endl;
     rclose(sock_client);
     rclose(sock_listener);
