@@ -16,6 +16,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <rdma/rdma_cma.h>
 enum {
@@ -155,6 +156,7 @@ int main(int argc, char* argv[]) {
     send_wr.send_flags = IBV_SEND_SIGNALED;
     send_wr.sg_list = &sge;
     send_wr.num_sge = 1;
+    sleep(3); // Patch for sync
     if (ibv_post_send(cm_id->qp, &send_wr, &bad_send_wr))
         return 1;
 
