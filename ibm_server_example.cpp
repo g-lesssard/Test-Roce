@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     recv_wr.num_sge = 1;
     if (ibv_post_recv(cm_id->qp, &recv_wr, &bad_recv_wr))
         return 1;
-    rep_pdata.buf_va = htonl((uintptr_t)buf);
+    rep_pdata.buf_va = htobe64((uintptr_t)buf);
     rep_pdata.buf_rkey = htonl(mr->rkey);
     conn_param.responder_resources = 1;
     conn_param.private_data = &rep_pdata;
@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
     send_wr.sg_list = &sge;
     send_wr.num_sge = 1;
     if (ibv_post_send(cm_id->qp, &send_wr, &bad_send_wr))
-    return 1;
+        return 1;
 
     /* Wait for send completion */
     if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
