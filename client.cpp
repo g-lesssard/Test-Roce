@@ -3,17 +3,27 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <cstdlib>
-#include <string>
 #include <cstring>
 
-constexpr unsigned int DEST_PORT = 6969;
-constexpr unsigned int SOURCE_PORT = 4242;
-constexpr const char DEST_ADDR[] = "10.42.0.1";
+constexpr unsigned int DEST_PORT = 6968;
+constexpr const char DEST_ADDR[] = "localhost";
+
+#define NO_RDMA
+#ifdef NO_RDMA
+#define rsocket socket
+#define raccept accept
+#define rbind bind
+#define rlisten listen
+#define raccept accept
+#define rconnect connect
+#define rsend send
+#define rrecv recv
+#define rclose close
+#endif
 
 int main(int argc, char **argv) {
-    int socket = rsocket(AF_INET, SOCK_STREAM, 0);
-    if (socket < 0) {
+    int sock = rsocket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
         std::cerr << "[ERROR] Failed to create client socket" << std::endl;
         return -1;
     }
@@ -33,17 +43,17 @@ int main(int argc, char **argv) {
     server_addr.sin_port = htons(DEST_PORT);
     inet_pton(AF_INET, DEST_ADDR, &server_addr.sin_addr);
 
-    if (rconnect(socket, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+    if (rconnect(sock, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         std::cerr << "[ERROR] Connection could not be established!\n";
         return -6;
     }
     std::cout << "[INFO] Connection established.\n";
-    char message[] = "Hello RDMA!";
-    if (rsend(socket, message, sizeof(message), 0) < 0)
+    char message[] = "Hello_RDMA!";
+    if (rsend(sock, message, sizeof(message), 0) < 0)
         std::cerr << "[ERROR] Failed to send message";
     std::cout << "[INFO] Program teardown..." << std::endl;
-    rclose(socket);
-    std::cout << " [INFO] DONE!" << std::endl;
+    rclose(sock);
+    std::cout << "[INFO] DONE!" << std::endl;
 
 
 }
