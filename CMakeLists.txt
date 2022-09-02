@@ -40,3 +40,21 @@ target_link_libraries(example_infinity
         PUBLIC
         lib-infinity
 )
+
+
+
+
+
+add_executable(read_server read_server.cpp)
+target_link_libraries(read_server
+        PUBLIC
+        rdmacm
+        ibverbs
+)
+
+add_executable(read_client read_client.cpp)
+target_link_libraries(read_client
+        PUBLIC
+        rdmacm
+        ibverbs
+)
