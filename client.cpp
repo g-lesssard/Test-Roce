@@ -12,7 +12,7 @@ constexpr const uint64_t message[] = {0xDEADBEEFFACEB00C,
                                       0x6969696969696969,
                                       0x420};
 
-//#define NO_RDMA
+#define NO_RDMA
 #ifdef NO_RDMA
 #define rsocket socket
 #define raccept accept

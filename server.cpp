@@ -94,11 +94,12 @@ int main(int argc, char **argv) {
     std::cout << "Successfully accepted connection!" << std::endl;
     ssize_t  size = 0;
     for (int i = 0; i < 3; i++ ) {
-        if (rrecv(sock_client, (uint64_t*)&buffer_vptr[i], 8, MSG_WAITALL) < 0)
+        if ( (size += rrecv(sock_client, (uint64_t*)&buffer_vptr[i], 8, MSG_WAITALL)) < 0)
             std::cerr << "[ERROR] Failed to receive word";
+        std::cout << "Bytes received: " << std::hex << (uint64_t)buffer_vptr[i] << std::endl;
     }
     //size = rrecv(sock_client, buffer_vptr, sizeof(expected_message), MSG_WAITALL);
-    std::cout << "[INFO] Received message(" << size << "): " << buffer_vptr << std::endl;
+    std::cout << "[INFO] Received message(" << size << "): " << *buffer_vptr << std::endl;
     std::cout << "Program teardown..." << std::endl;
     rclose(sock_client);
     rclose(sock_listener);
