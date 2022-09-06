@@ -8,10 +8,14 @@
 #include <unistd.h>
 
 constexpr unsigned int PORT = 6968;
+constexpr const uint64_t expected_message[] = {0xDEADBEEFFACEB00C,
+                                      0x6969696969696969,
+                                      0x420};
 
 char message[100];
-size_t file_size = 1000;
-off_t base_addr = 0;
+size_t file_size = 0x2000;
+off_t base_addr = 0xA0000000;
+char file_name[] = "/dev/mem";
 
 #define NO_RDMA
 #ifdef NO_RDMA
@@ -27,24 +31,23 @@ off_t base_addr = 0;
 #endif
 
 int main(int argc, char **argv) {
-    int fd = open("test_buf", O_RDWR | O_CREAT, 0666);
+    int fd = open(file_name, O_RDWR | O_SYNC);
     if (fd == -1) {
         std::cerr << "Failed to create/open file buffer" << std::endl;
         return -5;
     }
-    write(fd, "test", sizeof("test string longer message"));
-    //read(fd, &message, sizeof("test\n"));
-
-    char* buffer_vptr = (char*) mmap(NULL, file_size, PROT_READ | PROT_WRITE,
-                                     MAP_SHARED_VALIDATE, fd, base_addr);
+    //write(fd, "test", sizeof("test"));
+    //read(fd, message, sizeof("test\n"));
+    //std::cout << "Starting message is: " << message << std::endl;
+    auto * buffer_vptr = (uint64_t *) mmap(NULL, file_size, PROT_READ | PROT_WRITE,
+                                     MAP_SHARED, fd, base_addr);
     if (buffer_vptr == nullptr) {
         close(fd);
         std::cerr << "Failed to get virtual pointer to file" << std::endl;
         return -6;
     }
-    std::cout << "Starting message is: " << buffer_vptr << std::endl;
-    strcpy(buffer_vptr, "New_test");
-    std::cout << "New message is: " << buffer_vptr << std::endl;
+    buffer_vptr[0] = 0xDEADBEEFFACEB00C;
+    std::cout << "Starting message is: " << std::hex << buffer_vptr[1] << std::endl;
     std::cout << "Successfully obtained virtual pointer" << std::endl;
 
     std::cout << "Starting server..." << std::endl;
@@ -89,7 +92,12 @@ int main(int argc, char **argv) {
     }
 
     std::cout << "Successfully accepted connection!" << std::endl;
-    ssize_t size = rrecv(sock_client, buffer_vptr, 12, MSG_WAITALL);
+    ssize_t  size = 0;
+    for (int i = 0; i < 3; i++ ) {
+        if (rrecv(sock_client, (uint64_t*)&buffer_vptr[i], 8, MSG_WAITALL) < 0)
+            std::cerr << "[ERROR] Failed to receive word";
+    }
+    //size = rrecv(sock_client, buffer_vptr, sizeof(expected_message), MSG_WAITALL);
     std::cout << "[INFO] Received message(" << size << "): " << buffer_vptr << std::endl;
     std::cout << "Program teardown..." << std::endl;
     rclose(sock_client);

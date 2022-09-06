@@ -6,9 +6,13 @@
 #include <cstring>
 
 constexpr unsigned int DEST_PORT = 6968;
-constexpr const char DEST_ADDR[] = "localhost";
+constexpr const char DEST_ADDR[] = "10.42.0.105";
 
-#define NO_RDMA
+constexpr const uint64_t message[] = {0xDEADBEEFFACEB00C,
+                                      0x6969696969696969,
+                                      0x420};
+
+//#define NO_RDMA
 #ifdef NO_RDMA
 #define rsocket socket
 #define raccept accept
@@ -48,9 +52,11 @@ int main(int argc, char **argv) {
         return -6;
     }
     std::cout << "[INFO] Connection established.\n";
-    char message[] = "Hello_RDMA!";
-    if (rsend(sock, message, sizeof(message), 0) < 0)
-        std::cerr << "[ERROR] Failed to send message";
+    for (int i = 0; i < 3; i++ ) {
+        if (rsend(sock, (uint64_t*)&message[i], 8, 0) < 0)
+            std::cerr << "[ERROR] Failed to send message";
+    	std::cout << "[INFO] Bytes sent: " << std::hex << message[i] << std::endl;
+    }
     std::cout << "[INFO] Program teardown..." << std::endl;
     rclose(sock);
     std::cout << "[INFO] DONE!" << std::endl;
