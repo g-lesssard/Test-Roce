@@ -144,9 +144,6 @@ int main(int argc, char* argv[]) {
     send_wr.wr.rdma.rkey = ntohl(server_pdata.buf_rkey);
     send_wr.wr.rdma.remote_addr = be64toh(server_pdata.buf_va);
 
-    if (ibv_post_send(cm_id->qp, &send_wr, &bad_send_wr))
-        return 1;
-
     while (1) {
         int dummy;
         //std::cout << "Press enter to trigger next read";
