@@ -12,6 +12,7 @@
 #include <iostream>
 #include <iterator>
 #include "buffer_manager/StaticBuffer.h"
+#include "buffer_manager/BRAMBuffer.h"
 
 constexpr std::size_t MAX_LENGTH = 255;
 constexpr uint16_t LISTEN_PORT = 6969;
@@ -21,20 +22,16 @@ struct pdata {
     uint32_t buf_rkey;
 };
 
-
-
-
 int main(int argc, char* argv[]) {
-
-    std::array<char,MAX_LENGTH> receiving_buffer = {};
-    StaticBuffer<char, MAX_LENGTH> static_buffer;
+    StaticBuffer<uint64_t, MAX_LENGTH> recv_buffer;
+    //BRAMBuffer recv_buffer(8,0);
     sockaddr_in listen_addr;
 
     std::string input;
     std::cout <<  "Starting string: ";
     getline(std::cin, input);
     std::cout <<  std::endl;
-    input.copy((char*)static_buffer.getAddress(),input.length());
+    input.copy((char*)recv_buffer.getAddress(), input.length());
 
     rdma_cm_id* listen_id;
     rdma_cm_event* event;
@@ -74,7 +71,7 @@ int main(int argc, char* argv[]) {
         return 1;
     if (ibv_req_notify_cq(cq, 0))
         return 1;
-    auto mr = ibv_reg_mr(pd, static_buffer.getAddress(), static_buffer.getMaxSize(),
+    auto mr = ibv_reg_mr(pd, recv_buffer.getAddress(), recv_buffer.getMaxSize(),
                          IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
     if (!mr)
         return 1;
@@ -98,14 +95,14 @@ int main(int argc, char* argv[]) {
     pdata rep_pdata;
     rdma_conn_param conn_param = {};
     /* Post receive before accepting connection */
-    sge.addr = (uintptr_t)static_buffer.getAddress();
+    sge.addr = (uintptr_t)recv_buffer.getAddress();
     sge.length = sizeof(uint32_t);
     sge.lkey = mr->lkey;
     recv_wr.sg_list = &sge;
     recv_wr.num_sge = 1;
     if (ibv_post_recv(cm_id->qp, &recv_wr, &bad_recv_wr))
         return 1;
-    rep_pdata.buf_va = htobe64((uintptr_t)static_buffer.getAddress());
+    rep_pdata.buf_va = htobe64((uintptr_t)recv_buffer.getAddress());
     rep_pdata.buf_rkey = htonl(mr->rkey);
     conn_param.responder_resources = 1;
     conn_param.private_data = &rep_pdata;
@@ -121,15 +118,17 @@ int main(int argc, char* argv[]) {
         return 1;
     rdma_ack_cm_event(event);
 
+    char * end;
     while (1) {
         input.clear();
         std::cin.clear();
-        std::cout <<  "Update string: ";
+        std::cout <<  "Update data: ";
         getline(std::cin, input);
         std::cout <<  std::endl;
-        static_buffer.clear();
-        input.copy((char*)static_buffer.getAddress(),input.length());
-        std::cout << "Updated string is: " << static_buffer.getAddress() << std::endl;
+        recv_buffer.clear();
+
+        recv_buffer[0] = strtoull(input.c_str(), &end, 16);
+        std::cout << "Updated string is: " << std::hex << recv_buffer[0] << std::endl;
     }
 
 

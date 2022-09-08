@@ -2,13 +2,15 @@ set(LIB_NAME "buffer_manager")
 set(LIB_ALIAS "BufferManager")
 
 set(LIB_SOURCES
+    src/BRAMBuffer.cpp
 )
 
 set(LIB_HEADERS
     include/buffer_manager/IBuffer.h
     include/buffer_manager/StaticBuffer.h
     include/buffer_manager/StaticBuffer.tpp
-        )
+    include/buffer_manager/BRAMBuffer.h
+)
 
 add_library(${LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
 add_library(${LIB_ALIAS} ALIAS ${LIB_NAME})

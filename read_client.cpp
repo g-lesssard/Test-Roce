@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     struct addrinfo *res, *t;
     struct addrinfo hints = {.ai_family = AF_INET, .ai_socktype = SOCK_STREAM};
     int n;
-    std::array<char,MAX_LENGTH> receiving_buffer = {};
+    std::array<uint64_t ,MAX_LENGTH> receiving_buffer = {};
     int err;
 
     /* Set up RDMA CM structures */
@@ -171,7 +171,8 @@ int main(int argc, char* argv[]) {
         if (wc.status != IBV_WC_SUCCESS)
             return 1;
 
-        std::cout << "Read message is: " << receiving_buffer.data() << std::endl;
+
+        std::cout << "Read message is: " << std::hex << receiving_buffer[0]  << std::endl;
         sleep(1);
     }
     return 0;
