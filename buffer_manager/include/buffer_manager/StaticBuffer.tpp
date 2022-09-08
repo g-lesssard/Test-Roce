@@ -7,7 +7,7 @@ StaticBuffer<type, size>::StaticBuffer() {
 
 template<class type, std::size_t size>
 void *StaticBuffer<type, size>::getAddress() const {
-    return const_cast<char*>(m_array.data());
+    return const_cast<type*>(m_array.data());
 }
 
 template<class type, std::size_t size>
