@@ -16,6 +16,8 @@ public:
     void clear() override;
 
     std::array<type, size>& getContainer();
+    type operator [](uint i) const;
+    type& operator [](uint i);
 
 private:
     std::array<type, size> m_array;

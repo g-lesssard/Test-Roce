@@ -30,4 +30,14 @@ std::array<type, size>&  StaticBuffer<type, size>::getContainer() {
     return m_array;
 }
 
+template<class type, std::size_t size>
+type  StaticBuffer<type, size>::operator[](uint i) const {
+    return m_array[i];
+}
+
+template<class type, std::size_t size>
+type&  StaticBuffer<type, size>::operator[](uint i) {
+    return m_array[i];
+}
+
 
