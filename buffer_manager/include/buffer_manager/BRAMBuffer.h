@@ -3,6 +3,7 @@
 
 #include "buffer_manager/IBuffer.h"
 #include <unistd.h>
+#include <cstdint>
 
 class BRAMBuffer: public IBuffer {
 public:
@@ -13,6 +14,9 @@ public:
     std::size_t getMaxSize() const override;
     std::size_t getAlignment() const override;
     void clear() override;
+
+    uint64_t operator [](int i) const;
+    uint64_t& operator [](int i);
 
 private:
     const std::size_t MAX_BRAM_SIZE = 0x2000;
