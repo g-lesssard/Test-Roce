@@ -4,6 +4,7 @@ project(test_roce)
 set(CMAKE_CXX_STANDARD 20)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(infinity/infinity)
+add_subdirectory(buffer_manager)
 
 
 add_executable(server server.cpp)
@@ -50,6 +51,7 @@ target_link_libraries(read_server
         PUBLIC
         rdmacm
         ibverbs
+        BufferManager
 )
 
 add_executable(read_client read_client.cpp)

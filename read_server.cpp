@@ -11,8 +11,9 @@
 #include <rdma/rdma_cma.h>
 #include <iostream>
 #include <iterator>
+#include "buffer_manager/StaticBuffer.h"
 
-constexpr uint32_t MAX_LENGTH = 255;
+constexpr std::size_t MAX_LENGTH = 255;
 constexpr uint16_t LISTEN_PORT = 6969;
 
 struct pdata {
@@ -26,13 +27,14 @@ struct pdata {
 int main(int argc, char* argv[]) {
 
     std::array<char,MAX_LENGTH> receiving_buffer = {};
+    StaticBuffer<char, MAX_LENGTH> static_buffer;
     sockaddr_in listen_addr;
 
     std::string input;
     std::cout <<  "Starting string: ";
     getline(std::cin, input);
     std::cout <<  std::endl;
-    input.copy(receiving_buffer.data(),input.length());
+    input.copy((char*)static_buffer.getAddress(),input.length());
 
     rdma_cm_id* listen_id;
     rdma_cm_event* event;
@@ -72,7 +74,7 @@ int main(int argc, char* argv[]) {
         return 1;
     if (ibv_req_notify_cq(cq, 0))
         return 1;
-    auto mr = ibv_reg_mr(pd, receiving_buffer.data(), sizeof(receiving_buffer),
+    auto mr = ibv_reg_mr(pd, static_buffer.getAddress(), static_buffer.getMaxSize(),
                          IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
     if (!mr)
         return 1;
@@ -96,14 +98,14 @@ int main(int argc, char* argv[]) {
     pdata rep_pdata;
     rdma_conn_param conn_param = {};
     /* Post receive before accepting connection */
-    sge.addr = (uintptr_t)receiving_buffer.data();
+    sge.addr = (uintptr_t)static_buffer.getAddress();
     sge.length = sizeof(uint32_t);
     sge.lkey = mr->lkey;
     recv_wr.sg_list = &sge;
     recv_wr.num_sge = 1;
     if (ibv_post_recv(cm_id->qp, &recv_wr, &bad_recv_wr))
         return 1;
-    rep_pdata.buf_va = htobe64((uintptr_t)receiving_buffer.data());
+    rep_pdata.buf_va = htobe64((uintptr_t)static_buffer.getAddress());
     rep_pdata.buf_rkey = htonl(mr->rkey);
     conn_param.responder_resources = 1;
     conn_param.private_data = &rep_pdata;
@@ -125,9 +127,9 @@ int main(int argc, char* argv[]) {
         std::cout <<  "Update string: ";
         getline(std::cin, input);
         std::cout <<  std::endl;
-        receiving_buffer.fill(0);
-        input.copy(receiving_buffer.data(),input.length());
-        std::cout << "Updated string is: " << receiving_buffer.data() << std::endl;
+        static_buffer.clear();
+        input.copy((char*)static_buffer.getAddress(),input.length());
+        std::cout << "Updated string is: " << static_buffer.getAddress() << std::endl;
     }
 
 
