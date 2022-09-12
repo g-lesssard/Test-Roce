@@ -26,6 +26,11 @@ void StaticBuffer<type, size>::clear() {
 }
 
 template<class type, std::size_t size>
+ibv_mr*  StaticBuffer<type, size>::registerBuffer(ibv_pd* pd, unsigned int access) {
+    return ibv_reg_mr(pd, getAddress(), getMaxSize(), access);
+}
+
+template<class type, std::size_t size>
 std::array<type, size>&  StaticBuffer<type, size>::getContainer() {
     return m_array;
 }

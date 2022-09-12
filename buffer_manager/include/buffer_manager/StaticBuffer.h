@@ -14,6 +14,7 @@ public:
     std::size_t getMaxSize() const override;
     std::size_t getAlignment() const override;
     void clear() override;
+    ibv_mr * registerBuffer(ibv_pd* pd, unsigned int access) override;
 
     std::array<type, size>& getContainer();
     type operator [](uint i) const;
