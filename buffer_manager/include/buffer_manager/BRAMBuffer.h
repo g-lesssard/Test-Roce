@@ -17,6 +17,7 @@ public:
 
     uint64_t operator [](int i) const;
     uint64_t& operator [](int i);
+    int getFileDescriptor() const;
 
 private:
     const std::size_t MAX_BRAM_SIZE = 0x2000;

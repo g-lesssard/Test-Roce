@@ -34,3 +34,5 @@ uint64_t BRAMBuffer::operator[](int i) const {
 uint64_t& BRAMBuffer::operator[](int i) {
     return m_vptr[i];
 }
+
+int BRAMBuffer::getFileDescriptor() const { return m_fd;}
