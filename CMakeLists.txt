@@ -13,33 +13,33 @@ target_link_libraries(server
         PUBLIC
         ${${PROJECT_NAME}_rdmacm}
         ${${PROJECT_NAME}_ibverbs}
-        buffer_manager
+        ${PROJECT_NAME}::BufferManager
 )
 
 
 add_executable(client client.cpp)
 target_link_libraries(client
     PUBLIC
-        ${${PROJECT_NAME}_rdmacm}
-        ${${PROJECT_NAME}_ibverbs}
-        buffer_manager
+    ${${PROJECT_NAME}_rdmacm}
+    ${${PROJECT_NAME}_ibverbs}
+    ${PROJECT_NAME}::BufferManager
 )
 
 add_executable(ibm_client_example ibm_client_example.cpp)
 target_link_libraries(ibm_client_example
-        PUBLIC
-        ${${PROJECT_NAME}_rdmacm}
-        ${${PROJECT_NAME}_ibverbs}
-        buffer_manager
-        )
+    PUBLIC
+    ${${PROJECT_NAME}_rdmacm}
+    ${${PROJECT_NAME}_ibverbs}
+    ${PROJECT_NAME}::BufferManager
+)
 
 add_executable(ibm_server_example ibm_server_example.cpp)
 target_link_libraries(ibm_server_example
-        PUBLIC
-        ${${PROJECT_NAME}_rdmacm}
-        ${${PROJECT_NAME}_ibverbs}
-        buffer_manager
-        )
+    PUBLIC
+    ${${PROJECT_NAME}_rdmacm}
+    ${${PROJECT_NAME}_ibverbs}
+    ${PROJECT_NAME}::BufferManager
+)
 
 add_executable(example_infinity example_infinity.cpp)
 target_link_libraries(example_infinity
@@ -56,7 +56,7 @@ target_link_libraries(read_server
         PUBLIC
         ${${PROJECT_NAME}_rdmacm}
         ${${PROJECT_NAME}_ibverbs}
-        BufferManager
+        ${PROJECT_NAME}::BufferManager
 )
 
 add_executable(read_client read_client.cpp)

@@ -1,5 +1,5 @@
 set(LIB_NAME "buffer_manager")
-set(LIB_ALIAS "BufferManager")
+set(LIB_ALIAS "${PROJECT_NAME}::BufferManager")
 
 set(LIB_SOURCES
     src/BRAMBuffer.cpp
