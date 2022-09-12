@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cerrno>
+#include <cstring>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -23,15 +25,20 @@ struct pdata {
 };
 
 int main(int argc, char* argv[]) {
-    StaticBuffer<uint64_t, MAX_LENGTH> recv_buffer;
-    //BRAMBuffer recv_buffer(8,0);
+    //StaticBuffer<uint64_t, MAX_LENGTH> recv_buffer;
+    BRAMBuffer recv_buffer(0x2000,0, "rxe0");
+    std::cout << "Starting value in BRAM: " << std::hex << recv_buffer[0] << std::endl;
+    recv_buffer[0]  = 0x123;
+    std::cout << "New value in BRAM: " << std::hex << recv_buffer[0] << std::endl;
     sockaddr_in listen_addr;
+    char * end;
 
     std::string input;
     std::cout <<  "Starting string: ";
     getline(std::cin, input);
     std::cout <<  std::endl;
-    input.copy((char*)recv_buffer.getAddress(), input.length());
+    recv_buffer[0] = strtoull(input.c_str(), &end, 16);
+    std::cout << "New value in BRAM: " << std::hex << recv_buffer[0] << std::endl;
 
     rdma_cm_id* listen_id;
     rdma_cm_event* event;
@@ -41,40 +48,64 @@ int main(int argc, char* argv[]) {
         return 1;
     auto err = rdma_create_id(cm_channel, &listen_id, NULL, RDMA_PS_TCP);
     if (err)
-        return 1;
+        return 2;
     listen_addr.sin_family = AF_INET;
     listen_addr.sin_port = htons(LISTEN_PORT);
     listen_addr.sin_addr.s_addr = INADDR_ANY;
 
     err = rdma_bind_addr(listen_id, (sockaddr*)&listen_addr);
     if (err)
-        return 1;
+        return 3;
     err = rdma_listen(listen_id, 1);
     if (err)
-        return 1;
+        return 4;
     err = rdma_get_cm_event(cm_channel, &event);
     if (err)
-        return 1;
+        return 5;
     if (event->event != RDMA_CM_EVENT_CONNECT_REQUEST)
-        return 1;
+        return 6;
     rdma_cm_id* cm_id = event->id;
     rdma_ack_cm_event(event);
 
     auto pd = ibv_alloc_pd(cm_id->verbs);
     if (!pd)
-        return 1;
+        return 7;
     auto comp_channel = ibv_create_comp_channel(cm_id->verbs);
     if (!comp_channel)
-        return 1;
+        return 8;
     auto cq = ibv_create_cq(cm_id->verbs, 2, NULL, comp_channel, 0);
     if (!cq)
         return 1;
     if (ibv_req_notify_cq(cq, 0))
-        return 1;
-    auto mr = ibv_reg_mr(pd, recv_buffer.getAddress(), recv_buffer.getMaxSize(),
-                         IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
-    if (!mr)
-        return 1;
+        return 9;
+    /*auto* ctx = createContext("rxe0");
+
+    ibv_alloc_dm_attr dm_attr;
+    dm_attr.length = 0x2000;
+    dm_attr.log_align_req = 3;
+    auto* dm = ibv_alloc_dm(ctx, &dm_attr);
+    if (!dm) {
+        std::cerr << "Failed to allocate device memory " << std::strerror(errno) << std::endl;
+        return 10;
+    }
+    ibv_mr* mr = ibv_reg_dm_mr(pd,
+                            dm,
+                            0,
+                            recv_buffer.getMaxSize(),
+                            IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+
+
+    //auto* mr = ibv_reg_mr(pd, recv_buffer.getAddress(), recv_buffer.getMaxSize(),
+    //                     IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+    //auto * mr = ibv_reg_dmabuf_mr(pd, 0, 0x2000, (uint64_t)recv_buffer.getAddress(),
+    //                                recv_buffer.getFileDescriptor(),IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ );
+    */
+    auto mr = recv_buffer.registerBuffer(pd, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+    if (!mr) {
+        std::cerr << "Failed to register region " << std::strerror(errno) << std::endl;
+        return 10;
+    }
+
 
     ibv_qp_init_attr qp_attr = {};
     qp_attr.cap.max_send_wr = 1;
@@ -118,7 +149,7 @@ int main(int argc, char* argv[]) {
         return 1;
     rdma_ack_cm_event(event);
 
-    char * end;
+
     while (1) {
         input.clear();
         std::cin.clear();
