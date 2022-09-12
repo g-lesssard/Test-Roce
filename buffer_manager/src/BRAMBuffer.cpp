@@ -30,7 +30,7 @@ void BRAMBuffer::clear() {
 }
 
 ibv_mr *BRAMBuffer::registerBuffer(ibv_pd* pd, unsigned int access) {
-    /*ibv_alloc_dm_attr dm_attr;
+    ibv_alloc_dm_attr dm_attr;
     dm_attr.length = getMaxSize();
     dm_attr.log_align_req = 3;
     auto* dm = ibv_alloc_dm(m_ctx, &dm_attr);
@@ -47,13 +47,13 @@ ibv_mr *BRAMBuffer::registerBuffer(ibv_pd* pd, unsigned int access) {
         std::cerr << "BRAMBuffer: Failed to register device memory (" << std::strerror(errno) << ")" << std::endl;
         return nullptr;
     }
-    return mr;*/
-    auto * mr2 = ibv_reg_dmabuf_mr(pd, 0, getMaxSize(), (uint64_t)getAddress(), getFileDescriptor(),access);
+    return mr;
+    /*auto * mr2 = ibv_reg_dmabuf_mr(pd, 0, getMaxSize(), (uint64_t)getAddress(), getFileDescriptor(),access);
     if (!mr2) {
         std::cerr << "BRAMBuffer: Failed to register device memory (" << std::strerror(errno) << ")" << std::endl;
         return nullptr;
     }
-    return mr2;
+    return mr2;*/
 }
 ibv_context *BRAMBuffer::createContext(const std::string &device_name) {
     /* There is no way to directly open the device with its name; we should get the list of devices first. */
