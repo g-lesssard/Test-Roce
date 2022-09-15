@@ -6,7 +6,7 @@ StaticBuffer<type, size>::StaticBuffer() {
 }
 
 template<class type, std::size_t size>
-void *StaticBuffer<type, size>::getAddress() const {
+type *StaticBuffer<type, size>::getAddress() const {
     return const_cast<type*>(m_array.data());
 }
 
@@ -36,12 +36,12 @@ std::array<type, size>&  StaticBuffer<type, size>::getContainer() {
 }
 
 template<class type, std::size_t size>
-type  StaticBuffer<type, size>::operator[](uint i) const {
+type  StaticBuffer<type, size>::operator[](uint32_t i) const {
     return m_array[i];
 }
 
 template<class type, std::size_t size>
-type&  StaticBuffer<type, size>::operator[](uint i) {
+type&  StaticBuffer<type, size>::operator[](uint32_t i) {
     return m_array[i];
 }
 

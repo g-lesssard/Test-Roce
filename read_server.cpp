@@ -25,8 +25,8 @@ struct pdata {
 };
 
 int main(int argc, char* argv[]) {
-    //StaticBuffer<uint64_t, MAX_LENGTH> recv_buffer;
-    BRAMBuffer recv_buffer(0x2000,0, "rxe0");
+    StaticBuffer<uint64_t, MAX_LENGTH> recv_buffer;
+    //BRAMBuffer recv_buffer(0x2000,0, "rxe0");
     std::cout << "Starting value in BRAM: " << std::hex << recv_buffer[0] << std::endl;
     recv_buffer[0]  = 0x123;
     std::cout << "New value in BRAM: " << std::hex << recv_buffer[0] << std::endl;

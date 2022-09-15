@@ -19,7 +19,7 @@ BRAMBuffer::~BRAMBuffer() {
     close(m_fd);
 }
 
-void *BRAMBuffer::getAddress() const { return m_vptr;}
+uint64_t *BRAMBuffer::getAddress() const { return m_vptr;}
 
 std::size_t BRAMBuffer::getMaxSize() const { return m_allocated_size;}
 
@@ -76,11 +76,11 @@ ibv_context *BRAMBuffer::createContext(const std::string &device_name) {
     return context;
 }
 
-uint64_t BRAMBuffer::operator[](int i) const {
+uint64_t BRAMBuffer::operator[](uint32_t i) const {
     return m_vptr[i];
 }
 
-uint64_t& BRAMBuffer::operator[](int i) {
+uint64_t& BRAMBuffer::operator[](uint32_t i) {
     return m_vptr[i];
 }
 

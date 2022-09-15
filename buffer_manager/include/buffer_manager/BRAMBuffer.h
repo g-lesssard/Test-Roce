@@ -6,19 +6,19 @@
 #include <cstdint>
 #include <string>
 
-class BRAMBuffer: public IBuffer {
+class BRAMBuffer: public IBuffer<uint64_t>{
 public:
     BRAMBuffer(std::size_t size, off_t offset, const std::string& device);
     ~BRAMBuffer() override;
 
-    void * getAddress() const override;
+    uint64_t * getAddress() const override;
     std::size_t getMaxSize() const override;
     std::size_t getAlignment() const override;
     void clear() override;
     ibv_mr * registerBuffer(ibv_pd* pd, unsigned int access) override;
 
-    uint64_t operator [](int i) const;
-    uint64_t& operator [](int i);
+    uint64_t operator [](uint32_t i) const override;
+    uint64_t& operator [](uint32_t i) override;
     int getFileDescriptor() const;
 
 private:
