@@ -3,6 +3,7 @@ set(LIB_ALIAS "${PROJECT_NAME}::BufferManager")
 
 set(LIB_SOURCES
     src/BRAMBuffer.cpp
+
 )
 
 set(LIB_HEADERS
@@ -10,6 +11,9 @@ set(LIB_HEADERS
     include/buffer_manager/StaticBuffer.h
     include/buffer_manager/StaticBuffer.tpp
     include/buffer_manager/BRAMBuffer.h
+    include/buffer_manager/ICircularBuffer.h
+    include/buffer_manager/CircularBuffer.h
+    include/buffer_manager/CircularBuffer.tpp
 )
 
 add_library(${LIB_NAME} STATIC ${LIB_HEADERS} ${LIB_SOURCES})
