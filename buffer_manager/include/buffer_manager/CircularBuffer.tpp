@@ -7,6 +7,9 @@ template<class type>
 CircularBuffer<type>::CircularBuffer(IBuffer<type>& buffer) : m_buffer(buffer) {
     m_resources.m_size = buffer.getMaxSize();
     m_resources.m_data = buffer.getAddress();
+    m_resources.m_readPos = 0;
+    m_resources.m_writePos = 0;
+    m_resources.m_isFull = false;
 }
 
 template<class type>
