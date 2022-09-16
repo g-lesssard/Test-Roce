@@ -26,5 +26,5 @@ private:
     CircularBufferResources<type> m_resources;
 };
 
-//#include "buffer_manager/CircularBuffer.h"
+#include "buffer_manager/CircularBuffer.tpp"
 #endif //TEST_ROCE_CIRCULARBUFFER_H

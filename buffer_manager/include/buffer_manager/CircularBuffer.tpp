@@ -4,7 +4,7 @@
 #include "buffer_manager/CircularBuffer.h"
 
 template<class type>
-CircularBuffer<type>::CircularBuffer(IBuffer<type>& buffer) {
+CircularBuffer<type>::CircularBuffer(IBuffer<type>& buffer) : m_buffer(buffer) {
     m_resources.m_size = buffer.getMaxSize();
     m_resources.m_data = buffer.getAddress();
 }
@@ -98,6 +98,7 @@ bool CircularBuffer<type>::getc(type &data) {
     }
 
     m_resources.m_isFull = false;
+    return true;
 }
 
 template<class type>

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(test_roce)
+option(ENABLE_TESTS "Flag to enable/disable tests in build" ON)
 set(CMAKE_CXX_STANDARD 20)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(infinity/infinity)
@@ -65,3 +66,10 @@ target_link_libraries(read_client
         ${${PROJECT_NAME}_rdmacm}
         ${${PROJECT_NAME}_ibverbs}
 )
+
+if (ENABLE_TESTS)
+    include(googletest/googletest)
+    enable_testing()
+    googletest_fetch_populate()
+    googletest_disable_warnings()
+endif ()

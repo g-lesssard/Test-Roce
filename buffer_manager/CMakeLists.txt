@@ -32,3 +32,7 @@ target_link_libraries(${LIB_NAME}
     PUBLIC
     ${${PROJECT_NAME}_ibverbs}
 )
+
+if(ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()
