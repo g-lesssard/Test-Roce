@@ -167,25 +167,16 @@ int main(int argc, char* argv[]) {
 
         if (ibv_post_send(cm_id->qp, &atomic_add_wr, &bad_send_wr))
             return 2;
+        if (ibv_post_send(cm_id->qp, &read_wr, &bad_send_wr))
+            return 1;
         if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
             return 3;
         if (ibv_req_notify_cq(cq, 0))
             return 4;
-        if (ibv_poll_cq(cq, 1, &wc) < 1)
+        if (ibv_poll_cq(cq, 2, &wc) < 1)
             return 5;
         if (wc.status != IBV_WC_SUCCESS)
             return 6;
-
-        if (ibv_post_send(cm_id->qp, &read_wr, &bad_send_wr))
-            return 1;
-        if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
-            return 1;
-        if (ibv_req_notify_cq(cq, 0))
-            return 1;
-        if (ibv_poll_cq(cq, 1, &wc) < 1)
-            return 1;
-        if (wc.status != IBV_WC_SUCCESS)
-            return 1;
 
 
         std::cout << "Read message is: " << std::hex << receiving_buffer[0]  << std::endl;
