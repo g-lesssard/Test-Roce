@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     //auto * mr = ibv_reg_dmabuf_mr(pd, 0, 0x2000, (uint64_t)recv_buffer.getAddress(),
     //                                recv_buffer.getFileDescriptor(),IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ );
     */
-    auto mr = recv_buffer.registerBuffer(pd, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ);
+    auto mr = recv_buffer.registerBuffer(pd, IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_ATOMIC);
     if (!mr) {
         std::cerr << "Failed to register region " << std::strerror(errno) << std::endl;
         return 10;

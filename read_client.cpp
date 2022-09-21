@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
     struct ibv_mr* mr;
     struct ibv_qp_init_attr qp_attr = {};
     struct ibv_sge sge;
-    struct ibv_send_wr send_wr = {};
+    struct ibv_send_wr read_wr = {};
+    struct ibv_send_wr atomic_add_wr = {};
     struct ibv_send_wr* bad_send_wr;
     struct ibv_recv_wr recv_wr = {};
     struct ibv_recv_wr* bad_recv_wr;
@@ -136,13 +137,23 @@ int main(int argc, char* argv[]) {
     sge.addr = (uintptr_t)receiving_buffer.data();
     sge.length = MAX_LENGTH;
     sge.lkey = mr->lkey;
-    send_wr.wr_id = 0;
-    send_wr.opcode = IBV_WR_RDMA_READ;
-    send_wr.send_flags = IBV_SEND_SIGNALED;
-    send_wr.sg_list = &sge;
-    send_wr.num_sge = 1;
-    send_wr.wr.rdma.rkey = ntohl(server_pdata.buf_rkey);
-    send_wr.wr.rdma.remote_addr = be64toh(server_pdata.buf_va);
+    read_wr.wr_id = 0;
+    read_wr.opcode = IBV_WR_RDMA_READ;
+    read_wr.send_flags = IBV_SEND_SIGNALED;
+    read_wr.sg_list = &sge;
+    read_wr.num_sge = 1;
+    read_wr.wr.rdma.rkey = ntohl(server_pdata.buf_rkey);
+    read_wr.wr.rdma.remote_addr = be64toh(server_pdata.buf_va);
+
+    atomic_add_wr.wr_id = 0;
+    atomic_add_wr.opcode = IBV_WR_ATOMIC_FETCH_AND_ADD;
+    atomic_add_wr.send_flags = IBV_SEND_SIGNALED;
+    atomic_add_wr.sg_list = &sge;
+    atomic_add_wr.num_sge = 1;
+    atomic_add_wr.wr.atomic.rkey = ntohl(server_pdata.buf_rkey);
+    atomic_add_wr.wr.atomic.remote_addr = be64toh(server_pdata.buf_va);
+    atomic_add_wr.wr.atomic.compare_add = 1;
+
 
     while (1) {
         int dummy;
@@ -150,17 +161,22 @@ int main(int argc, char* argv[]) {
         //std::cout.flush();
         //std::cin >> dummy;
 
-        sge.addr = (uintptr_t)receiving_buffer.data();
-        sge.length = MAX_LENGTH;
-        sge.lkey = mr->lkey;
-        send_wr.wr_id++;
-        send_wr.opcode = IBV_WR_RDMA_READ;
-        send_wr.sg_list = &sge;
-        send_wr.num_sge = 1;
-        send_wr.wr.rdma.rkey = ntohl(server_pdata.buf_rkey);
-        send_wr.wr.rdma.remote_addr = be64toh(server_pdata.buf_va);
 
-        if (ibv_post_send(cm_id->qp, &send_wr, &bad_send_wr))
+        read_wr.wr_id++;
+        atomic_add_wr.wr_id++;
+
+        if (ibv_post_send(cm_id->qp, &atomic_add_wr, &bad_send_wr))
+            return 2;
+        if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
+            return 3;
+        if (ibv_req_notify_cq(cq, 0))
+            return 4;
+        if (ibv_poll_cq(cq, 1, &wc) < 1)
+            return 5;
+        if (wc.status != IBV_WC_SUCCESS)
+            return 6;
+
+        if (ibv_post_send(cm_id->qp, &read_wr, &bad_send_wr))
             return 1;
         if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
             return 1;
